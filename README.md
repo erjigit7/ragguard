@@ -10,10 +10,22 @@ RagGuard is a lightweight version of the same idea: a cross-encoder fine-tuned t
 
 ## How it works
 
-- **Base model:** [`answerdotai/ModernBERT-base`](https://huggingface.co/answerdotai/ModernBERT-base) — long-context (up to 8192 tokens), since retrieved passages can run to several thousand characters.
+- **Base model:** [`answerdotai/ModernBERT-base`](https://huggingface.co/answerdotai/ModernBERT-base) — long-context (up to 8192 tokens, truncated to 512 for training speed), since retrieved passages can run to several thousand characters.
 - **Training data:** [RAGTruth](https://huggingface.co/datasets/wandb/RAGTruth-processed) — 15,090 human-annotated (context, answer) pairs across QA, summarization, and data-to-text tasks, MIT licensed. Label = 1 if grounded, 0 if the annotators flagged an evident conflict with the context or a baseless claim not supported by it.
 - **Training objective:** binary cross-entropy on the pair, same mechanism used to train the `cross-encoder/ms-marco-*` reranker family.
 - **Serving:** a small FastAPI service — `POST /check {"context": ..., "answer": ...}` → `{"grounded": bool, "score": float}`.
+
+## Results
+
+1 epoch, `max_length=512`, ~5.5 minutes on an RTX 4070 Ti. Evaluated on the RAGTruth test split (2,700 examples):
+
+| Metric | Value |
+|---|---|
+| Accuracy | 79.1% |
+| Precision (hallucinated) | 0.74 |
+| Recall (hallucinated) | 0.61 |
+| Precision (grounded) | 0.81 |
+| Recall (grounded) | 0.89 |
 
 ## Project layout
 

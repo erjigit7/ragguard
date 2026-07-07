@@ -2,7 +2,7 @@ import torch
 from sentence_transformers.cross_encoder import CrossEncoder
 
 BASE_MODEL = "answerdotai/ModernBERT-base"  # long-context (8192 tokens) — RAGTruth passages can be several thousand tokens
-MAX_LENGTH = 2048
+MAX_LENGTH = 512  # cut from 2048: long-tail long contexts were making training impractically slow
 DEFAULT_MODEL_PATH = "models/ragguard-v1"
 
 

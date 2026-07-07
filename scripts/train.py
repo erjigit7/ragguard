@@ -12,16 +12,16 @@ def main():
 
     args = CrossEncoderTrainingArguments(
         output_dir="models/ragguard-v1-checkpoints",
-        num_train_epochs=2,
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=8,
+        num_train_epochs=1,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
         learning_rate=2e-5,
         warmup_ratio=0.1,
         fp16=True,
         eval_strategy="steps",
-        eval_steps=500,
+        eval_steps=250,
         save_strategy="steps",
-        save_steps=500,
+        save_steps=250,
         save_total_limit=2,
         logging_steps=50,
     )
