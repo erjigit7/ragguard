@@ -5,3 +5,4 @@ __pycache__/
 models/
 .env
 .claude/
+unsloth_compiled_cache/
