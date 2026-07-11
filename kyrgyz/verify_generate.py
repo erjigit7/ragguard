@@ -11,16 +11,22 @@ Paste your own Kyrgyz text when prompted, or press Enter on an empty
 line to use a random fresh article from the corpus instead (skips the
 first 3000 articles, i.e. never one used to train the detector).
 
+Alternatively, pass --text-file path.txt (UTF-8) to skip the prompt --
+more reliable than piping text into stdin, which can pick up the
+wrong console codepage on Windows depending on how it's invoked.
+
 Writes kyrgyz/_verify_pair.json, which verify_score.py (run from
 RagGuard's own venv) reads next.
 """
 
+import argparse
 import json
 import random
 import sys
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8")
+sys.stdin.reconfigure(encoding="utf-8")
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "KyrgyzLLM"))
 
 from datasets import load_dataset
@@ -48,9 +54,16 @@ def generate_grounded(model, tokenizer, text, max_new_tokens=150):
 
 
 def main():
-    print("Вставьте кыргызский текст (одной строкой) и нажмите Enter.")
-    print("Или просто нажмите Enter — возьму случайную свежую статью из корпуса.\n")
-    text = input("> ").strip()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--text-file", default=None, help="Path to a UTF-8 .txt file with the Kyrgyz text")
+    args = parser.parse_args()
+
+    if args.text_file:
+        text = Path(args.text_file).read_text(encoding="utf-8").strip()
+    else:
+        print("Вставьте кыргызский текст (одной строкой) и нажмите Enter.")
+        print("Или просто нажмите Enter — возьму случайную свежую статью из корпуса.\n")
+        text = input("> ").strip()
     if not text:
         text = random_fresh_context()
         print("\n(взял случайную статью из корпуса)")
@@ -65,12 +78,14 @@ def main():
     # Generic filler claims, unrelated to any specific article, used as the
     # "borrowed sentence" donor pool for the addition-type corruption when
     # there's no batch of other real summaries to draw from (single-context
-    # interactive run) -- must NOT include `grounded` itself, or the
-    # corruption can degenerate into repeating the same sentence twice.
+    # interactive run) -- must NOT include `grounded` itself (degenerates
+    # into repeating the same sentence twice), and must NOT start with a
+    # connector word themselves (corrupt_addition already prepends one --
+    # "Ошондой эле ошондой эле..." otherwise).
     donors = [
-        "Ошондой эле бул тууралуу расмий түрдө эч ким жооп берген жок.",
-        "Мындан тышкары окуя болгон жерге кошумча күчтөр жиберилген.",
-        "Дагы бул чечим кийинки жумада күчүнө кире тургандыгы белгиленди.",
+        "Бул тууралуу расмий түрдө эч ким жооп берген жок.",
+        "Окуя болгон жерге кошумча күчтөр жиберилген.",
+        "Бул чечим кийинки жумада күчүнө кире тургандыгы белгиленди.",
     ]
     hallucinated = corrupt_fact(grounded, rng) or corrupt_addition(grounded, donors, rng)
 
