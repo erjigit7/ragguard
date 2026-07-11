@@ -6,3 +6,6 @@ models/
 .env
 .claude/
 unsloth_compiled_cache/
+kyrgyz/_verify_pair.json
+kyrgyz/_smoke_pairs.json
+kyrgyz/_verify_batch.json
