@@ -2,6 +2,8 @@
 
 A small, fast classifier that checks whether a RAG-generated answer is actually grounded in its retrieved context — or hallucinated.
 
+> Used in production by [Myizam](https://github.com/erjigit7/myizam) — a legal RAG assistant for Kyrgyzstan: every answer passes RagGuard before reaching the user.
+
 Two detectors live here: an **English** one trained on human-labeled data (RAGTruth), and a **Kyrgyz** one — likely the first of its kind — trained on a dataset that had to be created from scratch, including fine-tuning a separate LLM just to generate it (see [KyrgyzLLM](https://github.com/erjigit7/kyrgyzllm)).
 
 ## Why
